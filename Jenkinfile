@@ -10,6 +10,15 @@ pipeline {
     }
 
     stages {
+        stage('Debug environment') {
+            steps {
+                sh 'python3 --version'
+                sh 'git --version'
+                sh 'env'
+            }
+        }
+
+    stages {
         stage('Checkout') {
             steps {
                 checkout scm
