@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python-test-image'  // Utilise l'image Docker que vous avez construite
+        }
+    }
 
     stages {
         stage('Checkout') {
@@ -11,7 +15,7 @@ pipeline {
             steps {
                 script {
                     try {
-                        sh 'python -m unittest discover'
+                        sh 'python3 -m unittest discover'  // Utilise python3 pour exécuter les tests
                     } catch (Exception e) {
                         echo "Tests failed: ${e}"
                         currentBuild.result = 'FAILURE'
@@ -24,16 +28,24 @@ pipeline {
     post {
         success {
             echo 'Tests passed. Merging dev into master.'
-            sh 'git checkout master'
-            sh 'git merge --ff-only dev'
-            sh 'git push origin master'
+            sh '''
+                git config --global user.email "your-email@example.com"
+                git config --global user.name "Your Name"
+                git checkout master
+                git merge --ff-only dev
+                git push origin master
+            '''
         }
         failure {
             echo 'Tests failed. Moving commit to failures branch.'
-            sh 'git checkout dev'
-            sh 'git reset HEAD~1 --hard'
-            sh 'git checkout -b failures/${BUILD_NUMBER}'
-            sh 'git push origin failures/${BUILD_NUMBER}'
+            sh '''
+                git config --global user.email "your-email@example.com"
+                git config --global user.name "Your Name"
+                git checkout dev
+                git reset HEAD~1 --hard
+                git checkout -b failures/${BUILD_NUMBER}
+                git push origin failures/${BUILD_NUMBER}
+            '''
         }
     }
 }
