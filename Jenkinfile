@@ -6,6 +6,13 @@ pipeline {
     }
 
     stages {
+        stage('Cleanup') {
+            steps {
+                echo 'Cleaning workspace...'
+                deleteDir()
+            }
+        }
+
         stage('Debug environment') {
             steps {
                 sh 'python3 --version'
@@ -13,15 +20,12 @@ pipeline {
                 sh 'env'
             }
         }
-      
 
-   
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-     
 
         stage('Test') {
             steps {
@@ -56,9 +60,23 @@ pipeline {
                 git config user.email "fake@ci.local"
                 git config user.name "Jenkins"
                 git remote set-url origin https://${GIT_TOKEN}@github.com/clementDA/CI_RPG.git
+                
+                # Récupérer la dernière version de dev
+                git fetch origin dev
+                
+                # Rebaser la branche locale dev sur origin/dev proprement
                 git checkout dev
-                git reset HEAD~1 --hard
+                git reset --hard origin/dev
+                
+                # Afficher l’état du repo pour debug
+                git status
+                git branch
+                git log -3 --oneline
+                
+                # Créer et basculer sur la branche failures avec numéro de build
                 git checkout -b failures/${BUILD_NUMBER}
+                
+                # Pousser la nouvelle branche failures
                 git push origin failures/${BUILD_NUMBER}
             '''
         }
