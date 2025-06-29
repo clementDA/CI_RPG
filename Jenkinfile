@@ -50,7 +50,7 @@ pipeline {
                 git config user.name "Jenkins"
                 git remote set-url origin https://${GIT_TOKEN}@github.com/clementDA/CI_RPG.git
                 git checkout master
-                git merge --allow-unrelated-histories dev
+                git merge --allow-unrelated-histories origin/dev
                 git push origin master
             '''
         }
