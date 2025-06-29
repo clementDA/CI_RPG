@@ -1,8 +1,12 @@
 pipeline {
     agent {
-        dockerContainer {
-            image 'python-test-image'  
+        docker {
+            image 'python-test-image'
         }
+    }
+
+    environment {
+        GIT_TOKEN = credentials('GITOKEN')
     }
 
     stages {
@@ -11,14 +15,16 @@ pipeline {
                 checkout scm
             }
         }
+
         stage('Test') {
             steps {
                 script {
                     try {
-                        sh 'python3 -m unittest discover'  // Utilise python3 pour exécuter les tests
+                        sh 'python3 -m unittest discover'
                     } catch (Exception e) {
                         echo "Tests failed: ${e}"
                         currentBuild.result = 'FAILURE'
+                        error("Failing build due to test errors")
                     }
                 }
             }
@@ -29,6 +35,9 @@ pipeline {
         success {
             echo 'Tests passed. Merging dev into master.'
             sh '''
+                git config user.email "fake@ci.local"
+                git config user.name "Jenkins"
+                git remote set-url origin https://${GIT_TOKEN}@github.com/clementDA/CI_RPG.git
                 git checkout master
                 git merge --ff-only dev
                 git push origin master
@@ -37,6 +46,9 @@ pipeline {
         failure {
             echo 'Tests failed. Moving commit to failures branch.'
             sh '''
+                git config user.email "fake@ci.local"
+                git config user.name "Jenkins"
+                git remote set-url origin https://${GIT_TOKEN}@github.com/clementDA/CI_RPG.git
                 git checkout dev
                 git reset HEAD~1 --hard
                 git checkout -b failures/${BUILD_NUMBER}
