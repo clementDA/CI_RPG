@@ -39,8 +39,6 @@ pipeline {
         failure {
             echo 'Tests failed. Moving commit to failures branch.'
             sh '''
-                git config --global user.email "your-email@example.com"
-                git config --global user.name "Your Name"
                 git checkout dev
                 git reset HEAD~1 --hard
                 git checkout -b failures/${BUILD_NUMBER}
