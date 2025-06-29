@@ -29,6 +29,12 @@ class TestPersonnage(unittest.TestCase):
         blesse.soin("full")
         self.assertEqual(blesse.pv,10)
 
+    def test_soin_char(self):
+        blesse =modele_character("patient","humain")
+        blesse.pv -= 5
+        blesse.soin(2)
+        self.assertEqual(blesse.pv,7)
+
 
 if __name__ == '__main__':
     unittest.main()
