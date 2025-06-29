@@ -12,7 +12,7 @@ class monstre(modele_character):
         self.attaque += (2*multiplicateur)
         self.defense += (2*multiplicateur)
         if self.elite:
-            self.pv_max += multiplicateur * 80
+            self.pv_max += multiplicateur * 800
         else:
             self.pv_max += multiplicateur * 4
         self.pv = self.pv_max
