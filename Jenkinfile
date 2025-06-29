@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Test') {
+            steps {
+                script {
+                    try {
+                        sh 'python -m unittest discover'
+                    } catch (Exception e) {
+                        echo "Tests failed: ${e}"
+                        currentBuild.result = 'FAILURE'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Tests passed. Merging dev into master.'
+            sh 'git checkout master'
+            sh 'git merge --ff-only dev'
+            sh 'git push origin master'
+        }
+        failure {
+            echo 'Tests failed. Moving commit to failures branch.'
+            sh 'git checkout dev'
+            sh 'git reset HEAD~1 --hard'
+            sh 'git checkout -b failures/${BUILD_NUMBER}'
+            sh 'git push origin failures/${BUILD_NUMBER}'
+        }
+    }
+}
