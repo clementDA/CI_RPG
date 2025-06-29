@@ -1,7 +1,7 @@
 pipeline {
     agent {
-        docker {
-            image 'python-test-image'  // Utilise l'image Docker que vous avez construite
+        dockerContainer {
+            image 'python-test-image'  
         }
     }
 
